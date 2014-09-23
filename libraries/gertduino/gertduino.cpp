@@ -15,7 +15,14 @@
   
   Gertduino::~Gertduino()
   {
-  
+    for(int i=0;i<ledNumber;i++)
+    {
+      delete led[i];
+    }
+    for(int i=0;i<buttonNumber;i++)
+    {
+      delete buttons[i];
+    }  
   }
   
   void Gertduino::init()
