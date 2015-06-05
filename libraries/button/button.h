@@ -2,12 +2,11 @@
 #define BUTTON_H
 
 #include "Arduino.h"
-#include "cbiface.h"
 
 #define activeLow true
 #define activeHigh false
 
-class Button : public CallBackInterface
+class Button
 {
 
  public:
@@ -16,24 +15,22 @@ class Button : public CallBackInterface
   ~Button();
   void init();
   void initWithInternalPullup();
-  
+
   void attachFunctionOnButtonPressedEdge(void (*p_func)());
   void attachFunctionOnButtonReleasedEdge(void (*p_func)());
   void attachFunctionOnBothButtonEdges(void (*p_func)());
-  void detachFunction();
 
   boolean getValue();
+  void checkButton();
 
  private:
 
   int pin;
   boolean isActiveLow;
-  
-  // Method from CallBackInterface
-  void cbmethod();
-  
-  void (*p_fct)(void);
-  void attachISR(void (*p_func)(), int edge);
+  boolean state;
+  void (*p_fctButtonChanged)(void);
+  void (*p_fctButtonPressed)(void);
+  void (*p_fctButtonReleased)(void);
 
 };
 

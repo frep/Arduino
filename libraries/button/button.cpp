@@ -1,10 +1,12 @@
 #include "button.h"
-#include "ooPinChangeInt.h"
 
   Button::Button(int pinNr, boolean logicLevel)
   : pin(pinNr), isActiveLow(logicLevel)
   {
-    p_fct = NULL;
+    state = getValue();
+    p_fctButtonChanged  = NULL;
+    p_fctButtonPressed  = NULL;
+    p_fctButtonReleased = NULL;
   }
   
   Button::~Button()
@@ -27,39 +29,66 @@
     return digitalRead(pin);
   }
 
-  void Button::cbmethod()
-  {    
-    // calls the function, p_fct points at. This call would also work like this: (*p_fct)();
-    p_fct();
+  void Button::checkButton()
+  {
+    if(state != getValue())
+    {
+      if(p_fctButtonChanged != NULL)
+      {
+       (*p_fctButtonChanged)();
+      }
+      if(getValue() == false)
+      {
+        if(isActiveLow)
+        {
+          if(p_fctButtonPressed != NULL)
+          {
+            (*p_fctButtonPressed)();
+          }
+        }
+        else
+        {
+          if(p_fctButtonReleased != NULL)
+          {
+            (*p_fctButtonReleased)();
+          }
+        }
+      }
+      else
+      {
+        if(isActiveLow)
+        {
+          if(p_fctButtonReleased != NULL)
+          { 
+            (*p_fctButtonReleased)();
+          }
+        }
+        else
+        {
+          if(p_fctButtonPressed != NULL)
+          { 
+            (*p_fctButtonPressed)();
+          }
+        }
+      }
+      state = getValue();
+    }
   }
-  
+
   void Button::attachFunctionOnButtonPressedEdge(void (*p_func)())
   {
-    int buttonPressedEdge;
-    isActiveLow ? buttonPressedEdge = FALLING : buttonPressedEdge = RISING;
-    attachISR(p_func, buttonPressedEdge);
+    p_fctButtonPressed = p_func;
   }
   
   void Button::attachFunctionOnButtonReleasedEdge(void (*p_func)())
   {
-    int buttonReleasedEdge;
-    isActiveLow ? buttonReleasedEdge = RISING : buttonReleasedEdge = FALLING;
-    attachISR(p_func, buttonReleasedEdge);
+    p_fctButtonReleased = p_func;
   }
   
   void Button::attachFunctionOnBothButtonEdges(void (*p_func)())
   {
-    attachISR(p_func,  CHANGE);
+    p_fctButtonChanged = p_func;
   }
+
   
-  void Button::attachISR(void (*p_func)(), int edge)
-  {
-    p_fct = p_func;
-    PCintPort::attachInterrupt(pin, this, edge);
-  }
-  
-  void Button::detachFunction()
-  {
-    PCintPort::detachInterrupt(pin);
-  }
 

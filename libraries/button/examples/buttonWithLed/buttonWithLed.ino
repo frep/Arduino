@@ -2,7 +2,7 @@
 #include "led.h"
 
 Led led(13);
-Button button(16, activeLow);
+Button button(4, activeLow);
 
 void setup()
 { 
@@ -13,7 +13,9 @@ void setup()
 
 void loop() 
 {
-
+  button.checkButton();
+  // wait 20ms for debounce
+  delay(20);
 }
 
 void toggleLed()
